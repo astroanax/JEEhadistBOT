@@ -64,7 +64,7 @@ async def main_process(message):
         message.chat.id == CHAT_ID
         and (message.message_thread_id == None or message.message_thread_id == OF_TID)
         and message.text is not None
-        and message.endswith("/s")
+        and message.text.endswith("/s")
     ):
         eprint("found sarcasm!")
         await bot.reply_to(message, "🤨")
