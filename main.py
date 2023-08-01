@@ -34,6 +34,8 @@ ypt_cache = [None, None]
 remind_jee_users = [5624616056, 6165497652]  # Devansh @devansh1261  # $....
 
 bot = AsyncTeleBot(TOKEN)
+
+
 @bot.message_handler(
     func=lambda message: True,
     content_types=[

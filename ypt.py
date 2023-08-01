@@ -4,6 +4,7 @@ import json
 import datetime
 import os
 import sys
+from eprint import eprint
 
 
 def get_data():
@@ -26,7 +27,7 @@ def get_data():
     }
 
     r = requests.get(url, headers=headers, params=params)
-    eprint("response from ypt server", r.text.split("\n")[0])
+    eprint("response from ypt server", r.status_code)
     ranks = json.loads(r.text)["ms"]
 
     data = {}
