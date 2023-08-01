@@ -1,0 +1,8 @@
+prettytable
+pyTelegramBotAPI
+pytz
+Requests
+aiohttp
+beautifulsoup4
+lxml
+redis
