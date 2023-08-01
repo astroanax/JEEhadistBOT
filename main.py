@@ -13,6 +13,7 @@ import os
 import sys
 import db
 
+
 TOKEN = os.environ["TOKEN"]
 # chat ids
 CHAT_ID = -1001845692082
@@ -59,6 +60,14 @@ async def main_process(message):
         " to chat ",
         message.chat.id,
     )
+    if (
+        message.chat.id == CHAT_ID
+        and (message.message_thread_id == None or message.message_thread_id == OF_TID)
+        and message.text is not None
+        and message.endswith("/s")
+    ):
+        eprint("found sarcasm!")
+        await bot.reply_to(message, "🤨")
     if (
         message.chat.id == LOG_CHAT_ID
         and message.text is not None
