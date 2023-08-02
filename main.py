@@ -69,6 +69,11 @@ async def main_process(message):
         and message.text is not None
         and message.text.endswith("/s")
     ):
+        await bot.send_chat_action(
+            chat_id=message.chat.id,
+            message_thread_id=message.message_thread_id,
+            action="typing",
+        )
         eprint("found sarcasm!")
         await bot.reply_to(message, "🤨")
     if (
@@ -77,17 +82,24 @@ async def main_process(message):
         and message.message_thread_id is not None
     ):
         user_id = await db.get_userid(message.message_thread_id)
+        await bot.send_chat_action(action="typing", chat_id=user_id)
         await bot.send_message(chat_id=user_id, text=message.text)
     if message.chat.id == message.from_user.id and message.text is not None:
         try:
             tid = await db.get_thread_id(message.from_user)
             try:
+                await bot.send_chat_action(
+                    action="typing", chat_id=LOG_CHAT_ID, message_thread_id=tid
+                )
                 await bot.send_message(
                     chat_id=LOG_CHAT_ID, message_thread_id=tid, text=message.text
                 )
             except Exception as e:
                 eprint(e)
                 tid = await db.create_topic_log(message.from_user)
+                await bot.send_chat_action(
+                    action="typing", chat_id=LOG_CHAT_ID, message_thread_id=tid
+                )
                 await bot.send_message(
                     chat_id=LOG_CHAT_ID, message_thread_id=tid, text=message.text
                 )
@@ -96,18 +108,49 @@ async def main_process(message):
     if (
         message.chat.id == ADMIN_ID
         and message.text is not None
+        and message.text.startswith("/get_user_name")
+    ):
+        await bot.send_chat_action(
+            chat_id=message.chat.id,
+            message_thread_id=message.message_thread_id,
+            action="typing",
+        )
+        user_id = int(message.text.split()[1])
+        print(user_id)
+        user = (await bot.get_chat_member(chat_id=user_id, user_id=user_id)).user
+        await bot.reply_to(
+            message, str(user.username) + str(user.first_name) + str(user.last_name)
+        )
+    if (
+        message.chat.id == ADMIN_ID
+        and message.text is not None
         and message.text == "/jeereminder"
     ):
         try:
             await send_jee_reminder(cid=ADMIN_ID)
         except Exception as e:
-            await bot.reply_to(message, "unknown error!")
+            await bot.send_chat_action(
+                chat_id=message.chat.id,
+                message_thread_id=message.message_thread_id,
+                action="typing",
+            )
             eprint(e)
+            await bot.reply_to(message, "unknown error!")
     elif message.chat.id == ADMIN_ID and message.text == "/id":
         try:
+            await bot.send_chat_action(
+                chat_id=message.chat.id,
+                message_thread_id=message.message_thread_id,
+                action="typing",
+            )
             user_id = message.reply_to_message.forward_from.id
             await bot.reply_to(message, str(user_id))
         except Exception as e:
+            await bot.send_chat_action(
+                chat_id=message.chat.id,
+                message_thread_id=message.message_thread_id,
+                action="typing",
+            )
             await bot.reply_to(message, "unknown error!")
             eprint(e)
     if (
@@ -124,15 +167,26 @@ async def main_process(message):
         and message.text is not None
         and message.text.strip().startswith("/b64decode")
     ):
+        await bot.send_chat_action(
+            chat_id=message.chat.id,
+            message_thread_id=message.message_thread_id,
+            action="typing",
+        )
         payload = message.text.strip().split()[1]
         reply = base64.b64decode(payload)
         await bot.reply_to(message, reply.decode("utf-8"))
     elif message.chat.id == ADMIN_ID and message.text is not None:
         if message.text.startswith("/sendmsg "):
             try:
+                await bot.send_chat_action(
+                    chat_id=message.chat.id,
+                    message_thread_id=message.message_thread_id,
+                    action="typing",
+                )
                 to = message.text.split()[1]
                 if not to.startswith("@"):
                     to = int(to)
+                await bot.send_chat_action(action="typing", chat_id=to)
                 msg = ""
                 for i in message.text.split()[2:]:
                     msg += i + " "
@@ -145,15 +199,30 @@ async def main_process(message):
                 await bot.reply_to(message, "message sent to " + name)
             except Exception as e:
                 eprint(e)
+                await bot.send_chat_action(
+                    chat_id=message.chat.id,
+                    message_thread_id=message.message_thread_id,
+                    action="typing",
+                )
                 await bot.reply_to(message, "unknown error!")
         elif message.text.startswith("/getchatid "):
             try:
+                await bot.send_chat_action(
+                    chat_id=message.chat.id,
+                    message_thread_id=message.message_thread_id,
+                    action="typing",
+                )
                 target = message.text.split()[1]
                 if not target.startswith("@"):
                     raise Exception("not a username")
                 target_chat = await bot.get_chat(target)
                 await bot.reply_to(message, target_chat.id)
             except Exception as e:
+                await bot.send_chat_action(
+                    chat_id=message.chat.id,
+                    message_thread_id=message.message_thread_id,
+                    action="typing",
+                )
                 eprint(e)
                 await bot.reply_to(message, "unknown error!")
 
@@ -176,30 +245,50 @@ async def main_process(message):
             if len(message.entities) > 1:
                 if message.entities[1].type == "mention":
                     try:
+                        await bot.send_chat_action(
+                            chat_id=message.chat.id,
+                            message_thread_id=message.message_thread_id,
+                            action="typing",
+                        )
                         username = message.text.strip().split()[1]
                         user_id = await resolve_username(username[1:])
-                        total_messages, top_topics = await stats.get_user_stats(user_id)
-                        text = "📊Statistics for user " + username + "\n"
-                        text += (
-                            "Total messages sent by this user: "
-                            + str(total_messages)
-                            + "\n"
-                        )
-                        text += "Top topics: \n"
-                        for i, [topic, count] in enumerate(top_topics):
+                        if user_id is None:
+                            await bot.reply_to(message, "no such user found")
+                        else:
+                            total_messages, top_topics = await stats.get_user_stats(
+                                user_id
+                            )
+                            text = "📊Statistics for user " + username + "\n"
                             text += (
-                                str(i + 1)
-                                + ". "
-                                + resolve_topic(topic)
-                                + ": "
-                                + str(count)
+                                "Total messages sent by this user: "
+                                + str(total_messages)
                                 + "\n"
                             )
-                        await bot.reply_to(message, text)
+                            text += "Top topics: \n"
+                            for i, [topic, count] in enumerate(top_topics):
+                                text += (
+                                    str(i + 1)
+                                    + ". "
+                                    + resolve_topic(topic)
+                                    + ": "
+                                    + str(count)
+                                    + "\n"
+                                )
+                            await bot.reply_to(message, text)
                     except Exception as e:
+                        await bot.send_chat_action(
+                            chat_id=message.chat.id,
+                            message_thread_id=message.message_thread_id,
+                            action="typing",
+                        )
                         eprint(e)
                         await bot.reply_to(message, "unknown error!")
                 elif message.entities[1].type == "text_mention":
+                    await bot.send_chat_action(
+                        chat_id=message.chat.id,
+                        message_thread_id=message.message_thread_id,
+                        action="typing",
+                    )
                     user_id = message.entities[0].user.id
                     total_messages, top_topics = await stats.get_user_stats(user_id)
                     text = (
@@ -224,12 +313,22 @@ async def main_process(message):
                         )
                     await bot.reply_to(message, text)
                 else:
+                    await bot.send_chat_action(
+                        chat_id=message.chat.id,
+                        message_thread_id=message.message_thread_id,
+                        action="typing",
+                    )
                     await bot.reply_to(message, "usage: /stats [USERNAME|CHANNEL]")
             else:
                 # stats for topic
                 topic_name = message.text.strip().split()[1].lower()
                 topic = resolve_topic(topic_name)
                 if topic is None:
+                    await bot.send_chat_action(
+                        chat_id=message.chat.id,
+                        message_thread_id=message.message_thread_id,
+                        action="typing",
+                    )
                     await bot.reply_to(
                         message,
                         "topic "
@@ -238,6 +337,11 @@ async def main_process(message):
                         + "usage: /stats [USERNAME|CHANNEL]",
                     )
                 else:
+                    await bot.send_chat_action(
+                        chat_id=message.chat.id,
+                        message_thread_id=message.message_thread_id,
+                        action="typing",
+                    )
                     total_messages, top_users = await stats.get_topic_stats(topic)
                     text = "📈Statistics for topic " + topic_name + "\n"
                     text += (
@@ -280,6 +384,11 @@ async def main_process(message):
         and message.text is not None
         and message.text == "/show ypt-lb"
     ):
+        await bot.send_chat_action(
+            chat_id=message.chat.id,
+            message_thread_id=message.message_thread_id,
+            action="typing",
+        )
         global ypt_timeout
         if ypt_cache[0] is None or datetime.datetime.today() - ypt_cache[
             0
@@ -321,6 +430,11 @@ async def main_process(message):
             new_date = datetime.datetime.fromtimestamp(message.date).date()
             if new_date < old_date:
                 eprint("deleting message")
+                await bot.send_chat_action(
+                    chat_id=message.chat.id,
+                    message_thread_id=message.message_thread_id,
+                    action="typing",
+                )
                 reply = await bot.reply_to(
                     message,
                     "You have already set a target for today; edit your current target to change it",
@@ -358,6 +472,9 @@ async def main_process(message):
                 data["sl_data"] = sl_data
         elif message.from_user.id == ADMIN_ID and message.text is not None:
             if message.text == "enable slowdown":
+                await bot.send_chat_action(
+                    action="typing", message_thread_id=OF_TID, chat_id=message.chat.id
+                )
                 SLOWDOWN = True
                 await bot.send_message(
                     text="❄SLOWDOWN❄ enabled",
@@ -365,6 +482,9 @@ async def main_process(message):
                     chat_id=message.chat.id,
                 )
             elif message.text == "disable slowdown":
+                await bot.send_chat_action(
+                    action="typing", message_thread_id=OF_TID, chat_id=message.chat.id
+                )
                 SLOWDOWN = False
                 await bot.send_message(
                     text="❄SLOWDOWN❄ disabled",
@@ -372,6 +492,9 @@ async def main_process(message):
                     chat_id=message.chat.id,
                 )
             elif message.text == "enable slowdown-update":
+                await bot.send_chat_action(
+                    action="typing", message_thread_id=OF_TID, chat_id=message.chat.id
+                )
                 UPDATE_SLOWDOWN = True
                 await bot.send_message(
                     text="❄SLOWDOWN❄ update enabled",
@@ -379,6 +502,9 @@ async def main_process(message):
                     chat_id=message.chat.id,
                 )
             elif message.text == "disable slowdown-update":
+                await bot.send_chat_action(
+                    action="typing", message_thread_id=OF_TID, chat_id=message.chat.id
+                )
                 UPDATE_SLOWDOWN = False
                 await bot.send_message(
                     text="❄SLOWDOWN❄ update disabled",
@@ -387,6 +513,11 @@ async def main_process(message):
                 )
             elif "set slow-interval" == message.text[:17]:
                 try:
+                    await bot.send_chat_action(
+                        action="typing",
+                        message_thread_id=OF_TID,
+                        chat_id=message.chat.id,
+                    )
                     global interval
                     INTERVAL = int(message.text.split()[2])
                     await bot.send_message(
@@ -397,6 +528,9 @@ async def main_process(message):
                 except:
                     pass
             elif message.text == "show slow-interval":
+                await bot.send_chat_action(
+                    action="typing", message_thread_id=OF_TID, chat_id=message.chat.id
+                )
                 await bot.send_message(
                     text="slow-interval set to " + str(INTERVAL),
                     message_thread_id=OF_TID,
@@ -411,6 +545,9 @@ async def update_slowdown():
         if UPDATE_SLOWDOWN:
             if t > datetime.time(9, 00, 0) and t < datetime.time(5, 30, 0):
                 if not SLOWDOWN:
+                    await bot.send_chat_action(
+                        action="typing", message_thread_id=OF_TID, chat_id=CHAT_ID
+                    )
                     SLOWDOWN = True
                     eprint("slowdown enabled")
                     await bot.send_message(
@@ -419,6 +556,9 @@ async def update_slowdown():
                         chat_id=CHAT_ID,
                     )
             elif SLOWDOWN:
+                await bot.send_chat_action(
+                    action="typing", message_thread_id=OF_TID, chat_id=CHAT_ID
+                )
                 SLOWDOWN = False
                 eprint("slowdown disabled")
                 await bot.send_message(
@@ -430,6 +570,7 @@ async def update_slowdown():
 
 
 async def send_jee_reminder(cid, tid=None):
+    await bot.send_chat_action(action="typing", message_thread_id=tid, chat_id=cid)
     jee_main, jee_adv, quote = jee_reminder()
     message = "*⏰ DAILY REMINDER*\n\n"
     message += "⏳" + str(jee_main) + " days left for JEE Main\n"

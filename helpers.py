@@ -3,6 +3,7 @@ from telethon.tl.functions.users import GetFullUserRequest
 import os
 import sys
 import asyncio
+from eprint import eprint
 
 api_id = int(os.environ["TG_API_ID"])
 api_hash = os.environ["TG_API_HASH"]
@@ -11,8 +12,12 @@ bot_token = os.environ["TG_BOT_TOKEN"]
 
 async def resolve_username(username):
     bot = await TelegramClient("bot", api_id, api_hash).start(bot_token=bot_token)
-    result = await bot(GetFullUserRequest(id=username))
-    return int(result.full_user.id)
+    try:
+        result = await bot(GetFullUserRequest(id=username))
+        return int(result.full_user.id)
+    except ValueError:
+        eprint("no user found with ", username)
+        return None
 
 
 def resolve_topic(topic):

@@ -60,13 +60,16 @@ async def handle_client(reader, writer):
             message += "\n"
 
         if len(message) > 0:
+            await main.bot.send_chat_action(
+                action="typing", chat_id=main.CHAT_ID, message_thread_id=main.NTC_ID
+            )
+            eprint("sending update")
             await main.bot.send_message(
                 chat_id=main.CHAT_ID,
                 message_thread_id=main.NTC_ID,
                 text=message,
                 parse_mode="html",
             )
-            eprint("sending update")
     writer.write(response.encode("utf8"))
     await writer.drain()
     writer.close()
