@@ -18,7 +18,6 @@ async def handle_client(reader, writer):
         await main.send_jee_reminder(main.remind_jee_users[0])
     elif request.startswith("GET /sendJeeReminder?auth=@droppers95tards2"):
         eprint("sending jee reminder 2")
-        await main.send_jee_reminder(main.remind_jee_users[0])
         await main.send_jee_reminder(main.remind_jee_users[1])
 
     elif request.startswith("GET /getNewsUpdates"):
