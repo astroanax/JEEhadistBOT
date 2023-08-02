@@ -171,31 +171,36 @@ async def main_process(message):
         and message.text is not None
         and message.text.startswith("/stats")
     ):
-        if len(message.text.strip().split()) > 0:
+        if len(message.text.strip().split()) > 1:
             # stats for channel or user
-            if message.entities is not None:
-                if message.entities[0].type == "mention":
-                    username = message.text.strip().split()[1]
-                    user_id = await resolve_username(username[1:])
-                    total_messages, top_topics = await stats.get_user_stats(user_id)
-                    text = "📊Statistics for user " + username + "\n"
-                    text += (
-                        "Total messages sent by this user: "
-                        + str(total_messages)
-                        + "\n"
-                    )
-                    text += "Top topics: "
-                    for i, [topic, count] in enumerate(top_topics):
+            if len(message.entities) > 1:
+                eprint(message.entities[1].type)
+                if message.entities[1].type == "mention":
+                    try:
+                        username = message.text.strip().split()[1]
+                        user_id = await resolve_username(username[1:])
+                        total_messages, top_topics = await stats.get_user_stats(user_id)
+                        text = "📊Statistics for user " + username + "\n"
                         text += (
-                            str(i + 1)
-                            + ". "
-                            + resolve_topic(topic)
-                            + ": "
-                            + str(count)
+                            "Total messages sent by this user: "
+                            + str(total_messages)
                             + "\n"
                         )
-                    await bot.reply_to(message, text)
-                elif message.entities[0].type == "text_mention":
+                        text += "Top topics: "
+                        for i, [topic, count] in enumerate(top_topics):
+                            text += (
+                                str(i + 1)
+                                + ". "
+                                + resolve_topic(topic)
+                                + ": "
+                                + str(count)
+                                + "\n"
+                            )
+                        await bot.reply_to(message, text)
+                    except Exception as e:
+                        eprint(e)
+                        await bot.reply_to(message, "unknown error!")
+                elif message.entities[1].type == "text_mention":
                     user_id = message.entities[0].user.id
                     total_messages, top_topics = await stats.get_user_stats(user_id)
                     text = (

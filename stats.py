@@ -1,5 +1,6 @@
 import db
 import json
+from eprint import eprint
 
 
 async def handle_message(message):
@@ -29,12 +30,15 @@ async def get_topic_stats(topic):
 
 
 async def get_user_stats(user):
-    user = str(user)
-    stats = json.loads(await db.r.get("stats"))
-    top_topics = []
-    total_messages = 0
-    for topic in stats[user].keys():
-        total_messages += stats[user][topic]
-        top_topics.append([int(topic), stats[user][topic]])
-    top_topics = top_topics.sort(key=lambda i: i[1], reverse=True)[:5]
-    return total_messages, top_topics
+    try:
+        user = str(user)
+        stats = json.loads(await db.r.get("stats"))
+        top_topics = []
+        total_messages = 0
+        for topic in stats[user].keys():
+            total_messages += stats[user][topic]
+            top_topics.append([int(topic), stats[user][topic]])
+        top_topics = top_topics.sort(key=lambda i: i[1], reverse=True)[:5]
+        return total_messages, top_topics
+    except Exception as e:
+        eprint(e)
