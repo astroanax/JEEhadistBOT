@@ -3,7 +3,6 @@ import pytz
 import json
 import datetime
 import os
-import sys
 from eprint import eprint
 
 
@@ -12,7 +11,7 @@ def get_data():
     headers = {
         "user-agent": "Dart/2.19 (dart:io)",
         "accept-enconding": "gzip",
-        "authorization": "JWT " + os.environ["JWT"],
+        "authorization": "JWT " + os.environ["YPT_JWT"],
         "host": "pi.tgclab.com",
     }
     dt = datetime.datetime.now(pytz.utc)

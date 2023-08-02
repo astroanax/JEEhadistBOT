@@ -1,5 +1,4 @@
 import redis.asyncio as redis
-import asyncio
 import main
 from telebot.util import user_link
 import os
@@ -35,7 +34,7 @@ async def create_topic_log(user):
     t_name = t_name[:100] + " - " + str(user_id)
     topic = await main.bot.create_forum_topic(chat_id=main.LOG_CHAT_ID, name=t_name)
     text = user_link(user=user, include_id=True)
-    sent = await main.bot.send_message(
+    await main.bot.send_message(
         chat_id=main.LOG_CHAT_ID,
         message_thread_id=topic.message_thread_id,
         text=text,

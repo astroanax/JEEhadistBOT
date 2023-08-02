@@ -8,16 +8,17 @@ import base64
 import pytz
 import asyncio
 import datetime
-import json
 import os
-import sys
 import db
+import stats
+from helpers import resolve_username, resolve_topic
+from telebot.util import user_link
 
 
-TOKEN = os.environ["TOKEN"]
+TOKEN = os.environ["TG_BOT_TOKEN"]
 # chat ids
 CHAT_ID = -1001845692082
-PL_TID = 8336
+DT_TID = 8336
 OF_TID = 3471
 NTC_ID = 11695
 ADMIN_ID = 1761484268
@@ -60,6 +61,8 @@ async def main_process(message):
         " to chat ",
         message.chat.id,
     )
+    if message.chat.id == CHAT_ID:
+        stats.handle_message(message)
     if (
         message.chat.id == CHAT_ID
         and (message.message_thread_id == None or message.message_thread_id == OF_TID)
@@ -79,17 +82,22 @@ async def main_process(message):
         try:
             tid = await db.get_thread_id(message.from_user)
             try:
-                sent = await bot.send_message(
+                await bot.send_message(
                     chat_id=LOG_CHAT_ID, message_thread_id=tid, text=message.text
                 )
             except Exception as e:
+                eprint(e)
                 tid = await db.create_topic_log(message.from_user)
-                sent = await bot.send_message(
+                await bot.send_message(
                     chat_id=LOG_CHAT_ID, message_thread_id=tid, text=message.text
                 )
         except Exception as e:
             eprint(e)
-    if message.chat.id == ADMIN_ID and message.text == "/jeereminder":
+    if (
+        message.chat.id == ADMIN_ID
+        and message.text is not None
+        and message.text == "/jeereminder"
+    ):
         try:
             await send_jee_reminder(cid=ADMIN_ID)
         except Exception as e:
@@ -161,6 +169,104 @@ async def main_process(message):
             or message.chat.id == ADMIN_ID
         )
         and message.text is not None
+        and message.text.startswith("/stats")
+    ):
+        if len(message.text.strip().split()) > 0:
+            # stats for channel or user
+            if message.entities is not None:
+                if message.entities[0].type == "mention":
+                    username = message.text.strip().split()[1]
+                    user_id = await resolve_username(username[1:])
+                    total_messages, top_topics = await stats.get_user_stats(user_id)
+                    text = "📊Statistics for user " + username + "\n"
+                    text += (
+                        "Total messages sent by this user: "
+                        + str(total_messages)
+                        + "\n"
+                    )
+                    text += "Top topics: "
+                    for i, [topic, count] in enumerate(top_topics):
+                        text += (
+                            str(i + 1)
+                            + ". "
+                            + resolve_topic(topic)
+                            + ": "
+                            + str(count)
+                            + "\n"
+                        )
+                    await bot.reply_to(message, text)
+                elif message.entities[0].type == "text_mention":
+                    user_id = message.entities[0].user.id
+                    total_messages, top_topics = await stats.get_user_stats(user_id)
+                    text = (
+                        "📊Statistics for user "
+                        + user_link(user=message.entities[0].user)
+                        + "\n"
+                    )
+                    text += (
+                        "Total messages sent by this user: "
+                        + str(total_messages)
+                        + "\n"
+                    )
+                    text += "Top topics: "
+                    for i, [topic, count] in enumerate(top_topics):
+                        text += (
+                            str(i + 1)
+                            + ". "
+                            + resolve_topic(topic)
+                            + ": "
+                            + str(count)
+                            + "\n"
+                        )
+                    await bot.reply_to(message, text)
+                else:
+                    await bot.reply_to(message, "usage: /stats [USERNAME|CHANNEL]")
+            else:
+                # stats for topic
+                topic_name = message.text.strip().split()[1]
+                topic = resolve_topic(topic_name)
+                if topic is None:
+                    await bot.reply_to(
+                        message,
+                        "topic "
+                        + topic_name
+                        + " not found\n"
+                        + "usage: /stats [USERNAME|CHANNEL]",
+                    )
+                else:
+                    total_messages, top_users = await stats.get_topic_stats(topic)
+                    text = "📈Statistics for topic " + topic_name + "\n"
+                    text += (
+                        "Total messages sent in this topic: "
+                        + str(total_messages)
+                        + "\n"
+                    )
+                    for i, [user, count] in enumerate(top_users):
+                        text += (
+                            str(i + 1)
+                            + ". "
+                            + (await resolve_username(user))
+                            + ": "
+                            + str(count)
+                            + "\n"
+                        )
+                    await bot.reply_to(message, text)
+
+        else:
+            # overall stats
+            pass
+    if (
+        (
+            (
+                message.chat.id == CHAT_ID
+                and (
+                    message.message_thread_id is None
+                    or message.message_thread_id == OF_TID
+                )
+            )
+            or message.chat.id == ADMIN_ID
+        )
+        and message.text is not None
         and message.text == "/show ypt-lb"
     ):
         global ypt_timeout
@@ -194,7 +300,7 @@ async def main_process(message):
             except Exception as e:
                 eprint(e)
                 await bot.reply_to(message, "unknown error!")
-    elif message.message_thread_id == PL_TID:
+    elif message.message_thread_id == DT_TID:
         eprint("message receieved from ", message.from_user.id)
         pl_data = data["pl_data"]
         try:
@@ -224,7 +330,6 @@ async def main_process(message):
 
     elif message.message_thread_id == OF_TID:
         sl_data = data["sl_data"]
-        time = datetime.datetime.fromtimestamp(message.date).time()
         global SLOWDOWN
         global UPDATE_SLOWDOWN
         global INTERVAL

@@ -1,7 +1,6 @@
 import asyncio
 import kcet
 import os
-import sys
 import main
 import updates
 from eprint import eprint
@@ -24,14 +23,14 @@ async def handle_client(reader, writer):
 
     elif request.startswith("GET /getNewsUpdates"):
         eprint("polling for news updates")
-        #kcet_message = ""
-        #kcet_updates = await kcet.get_kcet_updates()
-        #eprint("kcet ", kcet_updates)
-        #if len(kcet_updates) > 0:
+        # kcet_message = ""
+        # kcet_updates = await kcet.get_kcet_updates()
+        # eprint("kcet ", kcet_updates)
+        # if len(kcet_updates) > 0:
         #    kcet_message += "KCET Updates📢\n"
         #    for link in kcet_updates:
         #        kcet_message += "▪️ " + str(link) + "\n"
-        #if len(kcet_message) > 0:
+        # if len(kcet_message) > 0:
         #    await main.bot.send_message(
         #        chat_id=main.ADMIN_ID, text=kcet_message, parse_mode="html"
         #    )

@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup as bs
 import asyncio
 import pickle
 import sys
-import json
 import requests
 import datetime
 import pytz
