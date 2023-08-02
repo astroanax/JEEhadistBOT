@@ -5,7 +5,10 @@ from eprint import eprint
 
 async def handle_message(message):
     user = str(message.from_user.id)
-    topic = str(message.message_thread_id)
+    topic = message.message_thread_id
+    if topic is None:
+        topic = -1
+    topic = str(topic)
     stats = json.loads(await db.r.get("stats"))
     if user not in stats.keys():
         stats[user] = {}

@@ -16,10 +16,9 @@ async def resolve_username(username):
 
 
 async def resolve_topic(topic):
-    if topic is None:
-        return "General"
     if type(topic) == int:
         topics = {
+            -1: "General",
             11695: "Notices",
             3471: "Offtopic",
             8336: "Daily Target",
@@ -37,6 +36,7 @@ async def resolve_topic(topic):
             return "unknown channel"
     elif type(topic) == str:
         topics = {
+            "general": -1,
             "notices": 11695,
             "offtopic": 3471,
             "daily-target": 8336,
