@@ -62,7 +62,7 @@ async def main_process(message):
         message.chat.id,
     )
     if message.chat.id == CHAT_ID:
-        stats.handle_message(message)
+        await stats.handle_message(message)
     if (
         message.chat.id == CHAT_ID
         and (message.message_thread_id == None or message.message_thread_id == OF_TID)
