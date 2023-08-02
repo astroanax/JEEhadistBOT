@@ -32,7 +32,7 @@ data["pl_data"] = {}
 data["sl_data"] = {}
 
 ypt_cache = [None, None]
-remind_jee_users = [5624616056, 6165497652]  # Devansh @devansh1261  # $....
+remind_jee_users = [1744289341, 6165497652]  # Devansh @devansh1261  # $....
 
 bot = AsyncTeleBot(TOKEN)
 

@@ -16,7 +16,9 @@ async def get_kcet_updates():
         verify=False,
     )
     soup = bs(r.text, "html.parser")
+    print(soup.prettify())
     container = soup.find("div", {"class": "accordion"})
+    print(container)
     links = container.find_all("a")
     new_notices = links[:]
     old_notices = pickle.loads(await db.r.get("kcet"))

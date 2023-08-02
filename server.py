@@ -19,21 +19,22 @@ async def handle_client(reader, writer):
         await main.send_jee_reminder(main.remind_jee_users[0])
     elif request.startswith("GET /sendJeeReminder?auth=@droppers95tards2"):
         eprint("sending jee reminder 2")
+        await main.send_jee_reminder(main.remind_jee_users[0])
         await main.send_jee_reminder(main.remind_jee_users[1])
 
     elif request.startswith("GET /getNewsUpdates"):
         eprint("polling for news updates")
-        kcet_message = ""
-        kcet_updates = await kcet.get_kcet_updates()
-        eprint("kcet ", kcet_updates)
-        if len(kcet_updates) > 0:
-            kcet_message += "KCET Updates📢\n"
-            for link in kcet_updates:
-                kcet_message += "▪️ " + str(link) + "\n"
-        if len(kcet_message) > 0:
-            await main.bot.send_message(
-                chat_id=main.ADMIN_ID, text=kcet_message, parse_mode="html"
-            )
+        #kcet_message = ""
+        #kcet_updates = await kcet.get_kcet_updates()
+        #eprint("kcet ", kcet_updates)
+        #if len(kcet_updates) > 0:
+        #    kcet_message += "KCET Updates📢\n"
+        #    for link in kcet_updates:
+        #        kcet_message += "▪️ " + str(link) + "\n"
+        #if len(kcet_message) > 0:
+        #    await main.bot.send_message(
+        #        chat_id=main.ADMIN_ID, text=kcet_message, parse_mode="html"
+        #    )
 
         message = ""
         csab = await updates.get_csab_updates()
