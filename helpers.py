@@ -15,7 +15,7 @@ async def resolve_username(username):
     return int(result.full_user.id)
 
 
-async def resolve_topic(topic):
+def resolve_topic(topic):
     if type(topic) == int:
         topics = {
             -1: "General",

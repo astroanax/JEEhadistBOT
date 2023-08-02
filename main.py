@@ -172,9 +172,8 @@ async def main_process(message):
         and message.text.startswith("/stats")
     ):
         if len(message.text.strip().split()) > 1:
-            # stats for channel or user
+            # stats for topic or user
             if len(message.entities) > 1:
-                eprint(message.entities[1].type)
                 if message.entities[1].type == "mention":
                     try:
                         username = message.text.strip().split()[1]
@@ -186,7 +185,7 @@ async def main_process(message):
                             + str(total_messages)
                             + "\n"
                         )
-                        text += "Top topics: "
+                        text += "Top topics: \n"
                         for i, [topic, count] in enumerate(top_topics):
                             text += (
                                 str(i + 1)
@@ -213,7 +212,7 @@ async def main_process(message):
                         + str(total_messages)
                         + "\n"
                     )
-                    text += "Top topics: "
+                    text += "Top topics: \n"
                     for i, [topic, count] in enumerate(top_topics):
                         text += (
                             str(i + 1)
@@ -228,7 +227,7 @@ async def main_process(message):
                     await bot.reply_to(message, "usage: /stats [USERNAME|CHANNEL]")
             else:
                 # stats for topic
-                topic_name = message.text.strip().split()[1]
+                topic_name = message.text.strip().split()[1].lower()
                 topic = resolve_topic(topic_name)
                 if topic is None:
                     await bot.reply_to(
@@ -246,16 +245,23 @@ async def main_process(message):
                         + str(total_messages)
                         + "\n"
                     )
+                    text += "Top users: \n"
                     for i, [user, count] in enumerate(top_users):
                         text += (
                             str(i + 1)
                             + ". "
-                            + (await resolve_username(user))
+                            + user_link(
+                                (
+                                    await bot.get_chat_member(
+                                        chat_id=CHAT_ID, user_id=user
+                                    )
+                                ).user
+                            )
                             + ": "
                             + str(count)
                             + "\n"
                         )
-                    await bot.reply_to(message, text)
+                    await bot.reply_to(message, text, parse_mode="html")
 
         else:
             # overall stats
