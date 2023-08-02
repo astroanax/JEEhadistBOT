@@ -6,7 +6,7 @@ import asyncio
 
 api_id = int(os.environ["TG_API_ID"])
 api_hash = os.environ["TG_API_HASH"]
-bot_token = os.environ["TOKEN"]
+bot_token = os.environ["TG_BOT_TOKEN"]
 
 
 async def resolve_username(username):
