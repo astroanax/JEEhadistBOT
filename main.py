@@ -593,7 +593,6 @@ async def send_dpp():
     dpp = await get_dpp()
     if dpp is not None:
         topic = dpp[0]
-        pages = dpp[1]
         topic_names = {
             "Algebra": "Algebra",
             "Vector3DGeometry": "Vectors & 3D Geometry",

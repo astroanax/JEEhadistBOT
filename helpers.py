@@ -11,7 +11,10 @@ bot_token = os.environ["TG_BOT_TOKEN"]
 
 
 async def resolve_username(username):
-    os.remove("bot.session")
+    try:
+        os.remove("bot.session")
+    except:
+        pass
     bot = await TelegramClient("bot", api_id, api_hash).start(bot_token=bot_token)
     try:
         result = await bot(GetFullUserRequest(id=username))
