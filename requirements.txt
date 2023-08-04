@@ -7,3 +7,5 @@ beautifulsoup4
 lxml
 redis
 telethon
+aiogoogle
+pypdf2

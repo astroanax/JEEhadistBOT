@@ -20,6 +20,9 @@ async def handle_client(reader, writer):
         eprint("sending jee reminder 2")
         await main.send_jee_reminder(main.remind_jee_users[1])
 
+    elif request.startswith("GET /sendDailyDpp"):
+        await main.send_dpp()
+
     elif request.startswith("GET /getNewsUpdates"):
         eprint("polling for news updates")
         # kcet_message = ""

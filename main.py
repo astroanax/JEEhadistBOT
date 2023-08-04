@@ -1,4 +1,5 @@
 from telebot.async_telebot import AsyncTeleBot
+from telebot.types import InputFile
 from ypt import get_data
 from eprint import eprint
 import server
@@ -11,8 +12,10 @@ import datetime
 import os
 import db
 import stats
+import json
 from helpers import resolve_username, resolve_topic
 from telebot.util import user_link
+from getDpp import get_dpp
 
 
 TOKEN = os.environ["TG_BOT_TOKEN"]
@@ -21,6 +24,7 @@ CHAT_ID = -1001845692082
 DT_TID = 8336
 OF_TID = 3471
 NTC_ID = 11695
+DPP_ID = 15093
 ADMIN_ID = 1761484268
 LOG_CHAT_ID = -1001765656153
 
@@ -580,6 +584,49 @@ async def send_jee_reminder(cid, tid=None):
     await bot.send_message(
         text=message, chat_id=cid, message_thread_id=tid, parse_mode="markdown"
     )
+
+
+async def send_dpp():
+    await bot.send_chat_action(
+        action="upload_document", chat_id=CHAT_ID, message_thread_id=DPP_ID
+    )
+    dpp = await get_dpp()
+    if dpp is not None:
+        topic = dpp[0]
+        pages = dpp[1]
+        topic_names = {
+            "Algebra": "Algebra",
+            "Vector3DGeometry": "Vectors & 3D Geometry",
+            "Mechanics-2": "Mechanics",
+            "Magnetism": "Magnetism",
+            "Trignometey": "Trigonometry",
+            "WavesThermodynamics": "Waves & Thermodynamics",
+            "CoordinateGeometry": "Coordinate Geometry",
+            "Electrostatics": "Electrostatics",
+            "Calculas": "Calculus",
+            "PhysicalChemistry-2": "Physical Chemistry",
+            "Physical-1": "Physical Chemistry",
+            "OrganicChemistry-1": "Organic Chemistry",
+            "InorganicChemistry-2": "Inorganic Chemistry",
+            "Mechanics-1": "Mechanics",
+            "InorganicChemistry-1": "Inorganic Chemistry",
+            "Optics": "Optics & Modern Physics",
+        }
+        topic = topic_names[topic]
+        await bot.send_document(
+            CHAT_ID,
+            InputFile("dpp.pdf"),
+            caption="Daily DPP - Today's Topic: " + topic,
+            message_thread_id=DPP_ID,
+        )
+        eprint("sent dpp")
+        os.remove("dpp.pdf")
+        os.remove("downloaded.pdf")
+        oldDpps = json.loads(await db.r.get("oldDpps"))["oldDpps"]
+        oldDpps.append(dpp)
+        await db.r.set("oldDpps", json.dumps({"oldDpps": oldDpps}))
+    else:
+        eprint("error sending dpp")
 
 
 async def main():
