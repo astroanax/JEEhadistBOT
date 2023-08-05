@@ -373,7 +373,33 @@ async def main_process(message):
 
         else:
             # overall stats
-            pass
+            await bot.send_chat_action(
+                chat_id=message.chat.id,
+                message_thread_id=message.message_thread_id,
+                action="typing",
+            )
+            users, topics = await stats.get_overall_stats()
+            text = "--📋STATISTICS FOR 95%ilers Droppers-- "
+            text += "Top users:👄\n"
+            for i, [user, count] in enumerate(users):
+                text += (
+                    str(i + 1)
+                    + ". "
+                    + user_link(
+                        (await bot.get_chat_member(chat_id=CHAT_ID, user_id=user)).user
+                    )
+                    + ": "
+                    + str(count)
+                    + "\n"
+                )
+            text += "\n"
+            text += "Topic-wise statistics:💬\n"
+            for i, [topic, count] in enumerate(topics):
+                topic_name = resolve_topic(topic)
+                if topic_name == "unknown topic":
+                    continue
+                text += str(i + 1) + ". " + topic_name + ": " + str(count) + "\n"
+            await bot.reply_to(message, text, parse_mode="html")
     if (
         (
             (

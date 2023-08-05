@@ -2,7 +2,6 @@ from aiogoogle import Aiogoogle
 import os
 import json
 import asyncio
-import sys
 import random
 import db
 import datetime

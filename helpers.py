@@ -37,12 +37,14 @@ def resolve_topic(topic):
             11694: "Doubts - Math",
             3385: "Material",
             3389: "Motivation",
+            15099: "Daily DPP Discussion",
         }
         try:
             result = topics[topic]
             return result
         except KeyError:
-            return "unknown channel"
+            eprint("unknown topic", topic)
+            return "unknown topic"
     elif type(topic) == str:
         topics = {
             "general": -1,

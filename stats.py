@@ -51,3 +51,26 @@ async def get_user_stats(user):
         return total_messages, top_topics
     except Exception as e:
         eprint(e)
+
+
+async def get_overall_stats():
+    stats = json.loads(await db.r.get("stats"))
+    topics = {}
+    users = []
+    for user in stats.keys():
+        tot = 0
+        for topic in stats[user].keys():
+            tot += stats[user][topic]
+            if not topic in topics.keys():
+                topics[topic] = stats[user][topic]
+            else:
+                topics[topic] += stats[user][topic]
+        users.append([int(user), tot])
+    users.sort(key=lambda i: i[1], reverse=True)
+    users = users[:10]
+    tmp = []
+    for topic in topics.keys():
+        tmp.append([int(topic), topics[topic]])
+    topics = tmp
+    topics.sort(key=lambda i: i[1], reverse=True)
+    return users, topics
