@@ -379,7 +379,7 @@ async def main_process(message):
                 action="typing",
             )
             users, topics = await stats.get_overall_stats()
-            text = "--📋STATISTICS FOR 95%ilers Droppers-- "
+            text = "--📋STATISTICS FOR 95%ilers Droppers--\n\n"
             text += "Top users:👄\n"
             for i, [user, count] in enumerate(users):
                 text += (
