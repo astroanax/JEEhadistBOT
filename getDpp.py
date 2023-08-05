@@ -5,6 +5,7 @@ import asyncio
 import sys
 import random
 import db
+import datetime
 from eprint import eprint
 from PyPDF2 import PdfWriter, PdfReader
 
@@ -19,35 +20,30 @@ async def download_file(file_id, path):
 
 async def get_dpp():
     try:
-        with open("topic.json") as file:
-            topics = json.loads(file.read())
+        topics = json.loads(await db.r.get("topics"))
         t = []
         for topic in topics:
             t += [topic] * topics[topic]["weight"]
-        while True:
-            topic = random.choice(t)
-            pages = random.choice(topics[topic]["dpps"])
-            dpp = [topic, pages]
-            oldDpps = json.loads(await db.r.get("oldDpps"))["oldDpps"]
-            eprint(dpp, oldDpps)
-            if not dpp in oldDpps:
-                break
+        topic = random.choice(t)
+        pages = random.choice(topics[topic]["dpps"])
+        fname = topic + "-" + str(datetime.datetime.now().date()) + ".pdf"
+        dpp = [topic, pages, fname]
         eprint("chosen dpp: ", topic, pages)
         link = topics[topic]["link"]
         await download_file(link[33:], "downloaded.pdf")
-        split_pdf(pages)
+        split_pdf(pages, fname)
         return dpp
     except Exception as e:
         eprint(e)
         return None
 
 
-def split_pdf(pages):
+def split_pdf(pages, fname):
     reader = PdfReader("downloaded.pdf")
     writer = PdfWriter()
     for i in range(pages[0], pages[1] + 1):
         writer.add_page(reader.pages[i - 1])
-    with open("dpp.pdf", "wb") as fp:
+    with open(fname, "wb") as fp:
         writer.write(fp)
 
 

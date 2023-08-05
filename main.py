@@ -593,6 +593,8 @@ async def send_dpp():
     dpp = await get_dpp()
     if dpp is not None:
         topic = dpp[0]
+        pages = dpp[1]
+        fname = dpp[2]
         topic_names = {
             "Algebra": "Algebra",
             "Vector3DGeometry": "Vectors & 3D Geometry",
@@ -611,19 +613,21 @@ async def send_dpp():
             "InorganicChemistry-1": "Inorganic Chemistry",
             "Optics": "Optics & Modern Physics",
         }
-        topic = topic_names[topic]
+        topic_name = topic_names[topic]
         await bot.send_document(
             CHAT_ID,
-            InputFile("dpp.pdf"),
-            caption="Daily DPP - Today's Topic: " + topic,
+            InputFile(fname),
+            caption="Daily DPP - Today's Topic: " + topic_name,
             message_thread_id=DPP_ID,
         )
         eprint("sent dpp")
-        os.remove("dpp.pdf")
+        os.remove(fname)
         os.remove("downloaded.pdf")
-        oldDpps = json.loads(await db.r.get("oldDpps"))["oldDpps"]
-        oldDpps.append(dpp)
-        await db.r.set("oldDpps", json.dumps({"oldDpps": oldDpps}))
+        topics = json.loads(await db.r.get("topics"))
+        topics[topic]["dpps"].remove(pages)
+        if len(topics[topic]["dpps"]) == 0:
+            topics.pop(topic)
+        await db.r.set("topics", json.dumps(topics))
     else:
         eprint("error sending dpp")
 
