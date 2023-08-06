@@ -1,6 +1,16 @@
+import asyncio
 import db
 import json
 from eprint import eprint
+
+
+messageq = asyncio.Queue()
+
+
+async def processMessageQueue():
+    while True:
+        message = await messageq.get()
+        await handle_message(message)
 
 
 async def handle_message(message):
