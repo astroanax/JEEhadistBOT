@@ -1,0 +1,44 @@
+JEEhadistBOT
+@JEEhadistBOT https://t.me/JEEhadistBOT
+by @astroanax https://t.me/astroanax
+===========
+A Telegram bot created to aid the '95%ilers Droppers' group to help crack JEE Advanced 2024.
+
+* Features
+command to show ypt leaderboard
+chat statistics, both user and topic wise
+daily dpp
+periodic news checks
+decoding base64 text wih a command
+message log for the bot
+slowdown for topic (telegram doesnt have topic-wise slowdown timer)
+daily jee reminder
+
+* Requirements
+Run 'pip install -r requirements.txt' to install all dependencies.
+On Termux, aiogoogle may error out, to fix it, comment out the line mentioning 'os.link'
+
+* Setup
+The following enivonment variables are to be set:
+YPT_JWT - the JWT token for Yeolpumta (study tracking app). To get the JWT, you can MITM yourself with mitmproxy on a rooted Android device, or modify the Android app to log https traffic.
+PORT - port to run the webserver on
+REDIS_HOST - redis server hostname. redis is used to storing channel stats, news updates for websites like csa, josaa and jee main, and for the dpps json
+REDIS_PORT - redis server port
+REDIS_PASS - redis server pass
+TG_BOT_TOKEN - telegram bot token (get using @botfather)
+TG_API_ID - telegram API ID, used for resolving usernames to userids, using telethon. Alternatively, all chat members can checked for a partical user_id, but thought this was better
+TG_API_HASH - telegram API hash, for same as above
+GOOGLE_API_KEY - google api key gotten using google cloud console for downloading dpps from google drive
+
+* Running
+The way I deployed the bot, everything runs 24/7, for free. The bot itself runs on Render, with Redis as database, and Cloudflare workers for cronjobs to check news, keep alive(free instances on render shutdown afer 15 minutes of inactivity), and for sending the daily dpp. Writing the workers code should be very easy, all of them do the same thing, just send a get rewuest to a url at specified time/intervals. see server.py to get an idea.
+The Redis database has the following keys(some may need to be manually setup before running bot) -
+'news' - python dictionary as pickle storing news updates of websites listed above. see updates.py for structure
+'topics' - json storing list of all dpp topics, wih weigtage for jee advanced. see getDpps.py for structure
+'stats' - json storing statistics for users, topic-wise. see stats.py for structure
+There are also keys of the form 111, wherr 111 is the userid for a user, and T123 where 123 is the message_thread_id for a topic going on be created for the bot's incoming message log chat group. Although they could be grouped, I was too lazy to do so.
+Change the topic, admin and chatids in main.py to suit that of your group, and the corresponding topic names in helpers.py
+Also change the ypt group id for your study group
+If you want the topic json for the dpps, message me on telegram.
+
+To run the bot, run 'python main.py'
