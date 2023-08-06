@@ -54,7 +54,7 @@ async def handle_client(reader, writer):
                 message += "▪️ " + str(link) + "\n"
             message += "\n"
 
-        jeemain = await updates.get_josaa_updates()
+        jeemain = await updates.get_jeemain_updates()
         eprint("jeemain ", jeemain)
         if len(jeemain) > 0:
             message += "JEE Main Updates📢\n"

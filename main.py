@@ -3,7 +3,7 @@ from telebot.types import InputFile
 from ypt import get_data
 from eprint import eprint
 import server
-from updates import jee_reminder, processNewsQueue
+from updates import jee_reminder
 import prettytable as pt
 import base64
 import pytz
@@ -660,7 +660,6 @@ async def send_dpp():
 
 async def main():
     asyncio.create_task(update_slowdown())
-    asyncio.create_task(processNewsQueue())
     asyncio.create_task(stats.processMessageQueue())
     asyncio.create_task(server.run())
     await bot.polling()

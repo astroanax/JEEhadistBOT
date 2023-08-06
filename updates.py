@@ -11,17 +11,6 @@ JEE_ADV = datetime.datetime(2024, 6, 4, tzinfo=pytz.timezone("Asia/Kolkata"))
 JEE_MAIN = datetime.datetime(2024, 1, 15, tzinfo=pytz.timezone("Asia/Kolkata"))
 
 
-newsq = asyncio.Queue()
-
-
-async def processNewsQueue():
-    while True:
-        news = await newsq.get()
-        sys.setrecursionlimit(2**16)
-        await db.r.set("news", pickle.dumps(news))
-        sys.setrecursionlimit(1000)
-
-
 def jee_reminder():
     jee_adv = (JEE_ADV - datetime.datetime.now(pytz.timezone("Asia/Kolkata"))).days
     jee_main = (JEE_MAIN - datetime.datetime.now(pytz.timezone("Asia/Kolkata"))).days
@@ -47,7 +36,9 @@ async def get_csab_updates():
     news = pickle.loads(await db.r.get("news"))
     old_notices = news["csab"]
     news["csab"] = new_notices
-    await newsq.put(news)
+    sys.setrecursionlimit(2**16)
+    await db.r.set("news", pickle.dumps(news))
+    sys.setrecursionlimit(1000)
     return list(set(new_notices) - set(old_notices))
 
 
@@ -62,7 +53,9 @@ async def get_josaa_updates():
     news = pickle.loads(await db.r.get("news"))
     old_notices = news["josaa"]
     news["josaa"] = new_notices
-    await newsq.put(news)
+    sys.setrecursionlimit(2**16)
+    await db.r.set("news", pickle.dumps(news))
+    sys.setrecursionlimit(1000)
     return list(set(new_notices) - set(old_notices))
 
 
@@ -75,7 +68,9 @@ async def get_jeemain_updates():
     news = pickle.loads(await db.r.get("news"))
     old_notices = news["jeemain"]
     news["jeemain"] = new_notices
-    await newsq.put(news)
+    sys.setrecursionlimit(2**16)
+    await db.r.set("news", pickle.dumps(news))
+    sys.setrecursionlimit(1000)
     return list(set(new_notices) - set(old_notices))
 
 
