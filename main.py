@@ -382,16 +382,14 @@ async def main_process(message):
             text = "--📋STATISTICS FOR 95%ilers Droppers--\n\n"
             text += "Top users:👄\n"
             for i, [user, count] in enumerate(users):
-                text += (
-                    str(i + 1)
-                    + ". "
-                    + user_link(
+                try:
+                    username = user_link(
                         (await bot.get_chat_member(chat_id=CHAT_ID, user_id=user)).user
                     )
-                    + ": "
-                    + str(count)
-                    + "\n"
-                )
+                except Exception as e:
+                    eprint(e, "unknown user", user)
+                    username = "unknown user"
+                text += str(i + 1) + ". " + username + ": " + str(count) + "\n"
             text += "\n"
             text += "Topic-wise statistics:💬\n"
             for i, [topic, count] in enumerate(topics):
