@@ -52,6 +52,7 @@ def resolve_topic(topic):
             "offtopic": 3471,
             "daily-target": 8336,
             "daily-progress": 7788,
+            "daily-dpp-discussion": 15099,
             "doubts-physics": 2,
             "doubts-chemistry": 11693,
             "doubts-math": 11694,
