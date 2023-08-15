@@ -14,7 +14,6 @@ async def handle_client(reader, writer):
             eprint(request)
     if request.startswith("GET /sendJeeReminder?auth=@droppers95tards1"):
         eprint("sending jee reminder 1")
-        await main.send_jee_reminder(main.CHAT_ID, main.NTC_ID)
         await main.send_jee_reminder(main.remind_jee_users[0])
     elif request.startswith("GET /sendJeeReminder?auth=@droppers95tards2"):
         eprint("sending jee reminder 2")

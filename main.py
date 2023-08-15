@@ -327,7 +327,54 @@ async def main_process(message):
                 # stats for topic
                 topic_name = message.text.strip().split()[1].lower()
                 topic = resolve_topic(topic_name)
-                if topic is None:
+                if isinstance(topic, list):
+                    await bot.send_chat_action(
+                        chat_id=message.chat.id,
+                        message_thread_id=message.message_thread_id,
+                        action="typing",
+                    )
+                    total_messages = 0
+                    top_users = []
+                    for t in topic:
+                        messages, users = await stats.get_topic_stats(t)
+                        total_messages += messages
+                        for u in users:
+                            top_users.append(u)
+                    temp = {}
+                    for i in top_users:
+                        if not i[0] in temp.keys():
+                            temp[i[0]] = i[1]
+                        else:
+                            temp[i[0]] += i[1]
+                    top_users = []
+                    for user in temp:
+                        top_users.append([user, temp[user]])
+                    text = "📈Statistics for topic " + "Doubts" + "\n"
+                    text += (
+                        "Total messages sent in this topic: "
+                        + str(total_messages)
+                        + "\n"
+                    )
+                    top_users.sort(key=lambda i: i[1], reverse=True)
+                    top_users = top_users[:5]
+                    text += "Top users: \n"
+                    for i, [user, count] in enumerate(top_users):
+                        text += (
+                            str(i + 1)
+                            + ". "
+                            + user_link(
+                                (
+                                    await bot.get_chat_member(
+                                        chat_id=CHAT_ID, user_id=user
+                                    )
+                                ).user
+                            )
+                            + ": "
+                            + str(count)
+                            + "\n"
+                        )
+                    await bot.reply_to(message, text, parse_mode="html")
+                elif topic is None:
                     await bot.send_chat_action(
                         chat_id=message.chat.id,
                         message_thread_id=message.message_thread_id,
@@ -638,10 +685,16 @@ async def send_dpp():
             "Optics": "Optics & Modern Physics",
         }
         topic_name = topic_names[topic]
+        jee_main, jee_adv, quote = jee_reminder()
+        message = "*⏰ DAILY REMINDER*\n\n"
+        message += "⏳" + str(jee_main) + " days left for JEE Main\n"
+        message += "⏳" + str(jee_adv) + " days left for JEE Advanced\n\n"
+        message += "_”" + quote.split("\n")[0] + "_”\n"
+        message += "‎     ~ " + quote.split("\n")[1]
         await bot.send_document(
             CHAT_ID,
             InputFile(fname),
-            caption="Daily DPP - Today's Topic: " + topic_name,
+            caption="Daily DPP - Today's Topic: " + topic_name + "\n" + message,
             message_thread_id=DPP_ID,
         )
         eprint("sent dpp")

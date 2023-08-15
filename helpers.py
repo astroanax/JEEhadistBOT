@@ -56,6 +56,7 @@ def resolve_topic(topic):
             "doubts-physics": 2,
             "doubts-chemistry": 11693,
             "doubts-math": 11694,
+            "doubts": [2, 11693, 11694],
             "material": 3385,
             "motivation": 3389,
         }
