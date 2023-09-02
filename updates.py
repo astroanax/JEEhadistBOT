@@ -21,7 +21,7 @@ def jee_reminder():
         .find("img")["alt"]
         .lstrip(" motivational quote: ")
         .replace("</p><p>", "\n")
-    )
+    ).replace("\xa0 \xa0", "\n")
     return jee_main, jee_adv, quote
 
 
@@ -75,6 +75,7 @@ async def get_jeemain_updates():
 
 
 async def main():
+    print(jee_reminder())
     pass
 
 
