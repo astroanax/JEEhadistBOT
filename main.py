@@ -36,6 +36,7 @@ data = {}
 data["pl_data"] = {}
 data["sl_data"] = {}
 
+muted = []
 ypt_cache = [None, None]
 remind_jee_users = [1744289341, 6165497652]  # Devansh @devansh1261  # $....
 
@@ -67,6 +68,42 @@ async def main_process(message):
     )
     if message.chat.id == CHAT_ID:
         await stats.messageq.put(message)
+    if message.chat.id == CHAT_ID and message.from_user.id in muted:
+        await bot.delete_message(chat_id=message.chat.id, message_id=message.id)
+    if (
+        message.chat.id == CHAT_ID
+        and message.text is not None
+        and message.text.startswith("/mute ")
+    ):
+        if len(message.text.strip().split()) > 1:
+            if len(message.entities) > 1:
+                if message.entities[1].type == "mention":
+                    username = message.text.strip().split()[1]
+                    user_id = await resolve_username(username[1:])
+                    muted.append(user_id)
+                elif message.entities[1].type == "text_mention":
+                    user_id = message.entities[0].user.id
+                    muted.append(user_id)
+    if (
+        message.chat.id == CHAT_ID
+        and message.text is not None
+        and message.text.startswith("/unmute ")
+    ):
+        if len(message.text.strip().split()) > 1:
+            if len(message.entities) > 1:
+                if message.entities[1].type == "mention":
+                    username = message.text.strip().split()[1]
+                    user_id = await resolve_username(username[1:])
+                    try:
+                        muted.remove(user_id)
+                    except:
+                        pass
+                elif message.entities[1].type == "text_mention":
+                    user_id = message.entities[0].user.id
+                    try:
+                        muted.remove(user_id)
+                    except:
+                        pass
     if (
         message.chat.id == CHAT_ID
         and (message.message_thread_id == None or message.message_thread_id == OF_TID)

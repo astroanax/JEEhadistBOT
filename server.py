@@ -37,9 +37,9 @@ async def handle_client(reader, writer):
         #    )
 
         message = ""
-        #csab = await updates.get_csab_updates()
-        #eprint("csab ", csab)
-        #if len(csab) > 0:
+        # csab = await updates.get_csab_updates()
+        # eprint("csab ", csab)
+        # if len(csab) > 0:
         #    message += "CSAB Updates📢\n"
         #    for link in csab:
         #        message += "▪️ " + str(link) + "\n"
