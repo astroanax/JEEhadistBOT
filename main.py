@@ -81,9 +81,11 @@ async def main_process(message):
                     username = message.text.strip().split()[1]
                     user_id = await resolve_username(username[1:])
                     muted.append(user_id)
+                    bot.reply_to(message, text='muted')
                 elif message.entities[1].type == "text_mention":
                     user_id = message.entities[0].user.id
                     muted.append(user_id)
+                    bot.reply_to(message, text='muted')
     if (
         message.chat.id == CHAT_ID
         and message.text is not None
@@ -96,12 +98,14 @@ async def main_process(message):
                     user_id = await resolve_username(username[1:])
                     try:
                         muted.remove(user_id)
+                        bot.reply_to(message, text='unmuted')
                     except:
                         pass
                 elif message.entities[1].type == "text_mention":
                     user_id = message.entities[0].user.id
                     try:
                         muted.remove(user_id)
+                        bot.reply_to(message, text='unmuted')
                     except:
                         pass
     if (
