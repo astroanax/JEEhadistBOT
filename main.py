@@ -83,7 +83,7 @@ async def main_process(message):
                     muted.append(user_id)
                     bot.reply_to(message, text='muted')
                 elif message.entities[1].type == "text_mention":
-                    user_id = message.entities[0].user.id
+                    user_id = message.entities[1].user.id
                     muted.append(user_id)
                     bot.reply_to(message, text='muted')
     if (
@@ -102,7 +102,7 @@ async def main_process(message):
                     except:
                         pass
                 elif message.entities[1].type == "text_mention":
-                    user_id = message.entities[0].user.id
+                    user_id = message.entities[1].user.id
                     try:
                         muted.remove(user_id)
                         bot.reply_to(message, text='unmuted')
