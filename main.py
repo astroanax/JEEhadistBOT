@@ -28,6 +28,15 @@ DPP_ID = 15093
 ADMIN_ID = 1761484268
 LOG_CHAT_ID = -1001765656153
 
+NITC_TID = 31545
+NITCians = [
+    1761484268,  # Vijay
+    6652261291,  # Sandeep
+    5642248491,  # Durijesh
+    1394643085,  # Nishant
+    1170385621,  # Insaf
+]
+
 # slowdown vars
 SLOWDOWN = False
 UPDATE_SLOWDOWN = False
@@ -81,12 +90,31 @@ async def main_process(message):
                     username = message.text.strip().split()[1]
                     user_id = await resolve_username(username[1:])
                     muted.append(user_id)
-                    await bot.reply_to(message, text='muted')
+                    await bot.reply_to(message, text="muted")
                 elif message.entities[1].type == "text_mention":
                     print(message.entities)
                     user_id = message.entities[1].user.id
                     muted.append(user_id)
-                    await bot.reply_to(message, text='muted')
+                    await bot.reply_to(message, text="muted")
+    if message.chat.id == NITC_TID:
+        if message.from_user.id != ADMIN_ID and not message.from_user.id in NITCians:
+            await bot.delete_message(chat_id=message.chat.id, message_id=message.id)
+    if message.chat.id == ADMIN_ID and message.text.startswith("/get_mentioned_users"):
+        reply = message.reply_to_message
+        entities = reply.entities
+        reply_text = ""
+        for e in entities:
+            if e.type == "mention":
+                e_text = reply.text[e.offset : e.offset + e.length]
+                username = e_text
+                user_id = await resolve_username(username[1:])
+                reply_text += username + " " + str(user_id) + "\n"
+            elif e.type == "text_mention":
+                e_text = reply.text[e.offset : e.offset + e.length]
+                username = e_text
+                user_id = e.user.id
+                reply_text += username + " " + str(user_id) + "\n"
+        await bot.reply_to(message, text=reply_text)
     if (
         message.chat.id == CHAT_ID
         and message.text is not None
@@ -99,14 +127,14 @@ async def main_process(message):
                     user_id = await resolve_username(username[1:])
                     try:
                         muted.remove(user_id)
-                        await bot.reply_to(message, text='unmuted')
+                        await bot.reply_to(message, text="unmuted")
                     except:
                         pass
                 elif message.entities[1].type == "text_mention":
                     user_id = message.entities[1].user.id
                     try:
                         muted.remove(user_id)
-                        await bot.reply_to(message, text='unmuted')
+                        await bot.reply_to(message, text="unmuted")
                     except:
                         pass
     if (
