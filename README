@@ -41,4 +41,7 @@ Change the topic, admin and chatids in main.py to suit that of your group, and t
 Also change the ypt group id for your study group
 If you want the topic json for the dpps, message me on telegram.
 
+!!!UPDATE!!!
+As of August, I have switched everything to Microsoft Azure, hosting the bot on a B1s VM for free (using the GitHub Student Developer Pack). Render unfortunately suspended my account :( . If you're running the bot as a systemd service on the B1s, make sure to run the bot as a system service, if you run it as a user, the bot remains suspended till you log back in via SSH (its a burstable VM).
+
 To run the bot, run 'python main.py'
