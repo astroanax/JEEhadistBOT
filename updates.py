@@ -5,7 +5,7 @@ import sys
 import requests
 import datetime
 import pytz
-import db
+#import db
 
 JEE_ADV = datetime.datetime(2024, 6, 4, tzinfo=pytz.timezone("Asia/Kolkata"))
 JEE_MAIN = datetime.datetime(2024, 1, 24, tzinfo=pytz.timezone("Asia/Kolkata"))
@@ -17,7 +17,7 @@ def jee_reminder():
     r = requests.get("https://www.insightoftheday.com/")
     soup = bs(r.text, features="lxml")
     quote = (
-        soup.find_all("div", {"class": "quote"})[2]
+        soup.find_all("div", {"class": "quote"})[1]
         .find("img")["alt"]
         .lstrip(" motivational quote: ")
         .replace("</p><p>", "\n")
