@@ -8,7 +8,7 @@ import pytz
 import db
 
 JEE_ADV = datetime.datetime(2024, 6, 4, tzinfo=pytz.timezone("Asia/Kolkata"))
-JEE_MAIN = datetime.datetime(2024, 1, 15, tzinfo=pytz.timezone("Asia/Kolkata"))
+JEE_MAIN = datetime.datetime(2024, 1, 24, tzinfo=pytz.timezone("Asia/Kolkata"))
 
 
 def jee_reminder():
