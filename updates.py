@@ -7,8 +7,8 @@ import datetime
 import pytz
 import db
 
-JEE_ADV = datetime.datetime(2024, 6, 4, tzinfo=pytz.timezone("Asia/Kolkata"))
-JEE_MAIN = datetime.datetime(2024, 1, 24, tzinfo=pytz.timezone("Asia/Kolkata"))
+JEE_ADV = datetime.datetime(2024, 5, 28, tzinfo=pytz.timezone("Asia/Kolkata"))
+JEE_MAIN = datetime.datetime(2024, 1, 27, tzinfo=pytz.timezone("Asia/Kolkata"))
 
 
 def jee_reminder():
@@ -33,7 +33,11 @@ async def get_csab_updates():
     del links[2::3]
     del links[1::2]
     new_notices = links[:]
-    news = pickle.loads(await db.r.get("news"))
+    try:
+        news = pickle.loads(await db.r.get("news"))
+    except:
+        news = {"csab":[], "jeemain":[], "josaa":[], "jeeadv":[]}
+        await db.r.set("news", pickle.dumps(news))
     old_notices = news["csab"]
     news["csab"] = new_notices
     sys.setrecursionlimit(2**16)
@@ -50,7 +54,11 @@ async def get_josaa_updates():
     del links[2::3]
     del links[1::2]
     new_notices = links[:]
-    news = pickle.loads(await db.r.get("news"))
+    try:
+        news = pickle.loads(await db.r.get("news"))
+    except:
+        news = {"csab":[], "jeemain":[], "josaa":[], "jeeadv":[]}
+        await db.r.set("news", pickle.dumps(news))
     old_notices = news["josaa"]
     news["josaa"] = new_notices
     sys.setrecursionlimit(2**16)
@@ -60,12 +68,19 @@ async def get_josaa_updates():
 
 
 async def get_jeemain_updates():
-    rq = requests.get("https://jeemain.nta.nic.in/")
+    rq = requests.get("https://jeemain.nta.ac.in/")
     soup = bs(rq.text, "html.parser")
-    container = soup.find("div", {"class": "vc_tta-panel-body"})
+    container = soup.find("div", {"class": "news-eve-scroll"})
     links = container.find_all("a")
+    for link in links:
+        for img in link("img"):
+            img.decompose()
     new_notices = links[:]
-    news = pickle.loads(await db.r.get("news"))
+    try:
+        news = pickle.loads(await db.r.get("news"))
+    except:
+        news = {"csab":[], "jeemain":[], "josaa":[], "jeeadv":[]}
+        await db.r.set("news", pickle.dumps(news))
     old_notices = news["jeemain"]
     news["jeemain"] = new_notices
     sys.setrecursionlimit(2**16)
@@ -73,9 +88,25 @@ async def get_jeemain_updates():
     sys.setrecursionlimit(1000)
     return list(set(new_notices) - set(old_notices))
 
+async def get_jeeadv_updates():
+    rq = requests.get("https://jeeadv.ac.in/")
+    soup = bs(rq.text, "html.parser")
+    container = soup.find("div", {"class": "col"})
+    boxes = container.find_all("div", recursive=False)
+    new_notices = boxes[:]
+    try:
+        news = pickle.loads(await db.r.get("news"))
+    except:
+        news = {"csab":[], "jeemain":[], "josaa":[], "jeeadv":[]}
+        await db.r.set("news", pickle.dumps(news))
+    old_notices = news["jeeadv"]
+    news["jeeadv"] = new_notices
+    sys.setrecursionlimit(2**16)
+    await db.r.set("news", pickle.dumps(news))
+    sys.setrecursionlimit(1000)
+    return list(set(new_notices) - set(old_notices))
 
 async def main():
-    print(jee_reminder())
     pass
 
 

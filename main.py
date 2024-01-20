@@ -201,6 +201,7 @@ async def main_process(message):
         and message.text == "/jeereminder"
     ):
         try:
+            eprint("got /jeereminder")
             await send_jee_reminder(cid=ADMIN_ID)
         except Exception as e:
             await bot.send_chat_action(

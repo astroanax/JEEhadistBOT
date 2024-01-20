@@ -37,13 +37,13 @@ async def handle_client(reader, writer):
         #    )
 
         message = ""
-        # csab = await updates.get_csab_updates()
-        # eprint("csab ", csab)
-        # if len(csab) > 0:
-        #    message += "CSAB Updates📢\n"
-        #    for link in csab:
-        #        message += "▪️ " + str(link) + "\n"
-        #    message += "\n"
+        csab = await updates.get_csab_updates()
+        eprint("csab ", csab)
+        if len(csab) > 0:
+            message += "CSAB Updates📢\n"
+            for link in csab:
+                message += "▪️ " + str(link) + "\n"
+            message += "\n"
 
         josaa = await updates.get_josaa_updates()
         eprint("josaa ", josaa)
@@ -59,6 +59,15 @@ async def handle_client(reader, writer):
             message += "JEE Main Updates📢\n"
             for link in jeemain:
                 message += "▪️ " + str(link) + "\n"
+            message += "\n"
+
+        jeeadv = await updates.get_jeeadv_updates()
+        eprint("jeeadv ", jeemain)
+        if len(jeeadv) > 0:
+            message += "JEE Advanced Updates📢\n"
+            for notice in jeeadv:
+                message += "▪️ " +  notice.get_text() + "\n"
+                message += "\n==============================\n"
             message += "\n"
 
         if len(message) > 0:

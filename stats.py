@@ -19,7 +19,11 @@ async def handle_message(message):
     if topic is None:
         topic = -1
     topic = str(topic)
-    stats = json.loads(await db.r.get("stats"))
+    try:
+        stats = json.loads(await db.r.get("stats"))
+    except:
+        await db.r.set('stats', '{}')
+        stats = json.loads(await db.r.get("stats"))
     if user not in stats.keys():
         stats[user] = {}
         stats[user][topic] = 1
@@ -32,7 +36,11 @@ async def handle_message(message):
 
 async def get_topic_stats(topic):
     topic = str(topic)
-    stats = json.loads(await db.r.get("stats"))
+    try:
+        stats = json.loads(await db.r.get("stats"))
+    except:
+        await db.r.set('stats', '{}')
+        stats = json.loads(await db.r.get("stats"))
     top_users = []
     total_messages = 0
     for user in stats.keys():
@@ -48,7 +56,11 @@ async def get_topic_stats(topic):
 async def get_user_stats(user):
     try:
         user = str(user)
-        stats = json.loads(await db.r.get("stats"))
+        try:
+            stats = json.loads(await db.r.get("stats"))
+        except:
+            await db.r.set("stats", '{}')
+            stats = json.loads(await db.r.get("stats"))
         top_topics = []
         total_messages = 0
         if not user in stats.keys():
@@ -64,7 +76,11 @@ async def get_user_stats(user):
 
 
 async def get_overall_stats():
-    stats = json.loads(await db.r.get("stats"))
+    try:
+        stats = json.loads(await db.r.get("stats"))
+    except:
+        await db.r.set("stats", '{}')
+        stats = json.loads(await db.r.get("stats"))
     topics = {}
     users = []
     for user in stats.keys():
