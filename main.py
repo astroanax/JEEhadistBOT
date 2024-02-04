@@ -564,7 +564,7 @@ async def main_process(message):
     if (
         (
             (
-                message.chat.id == CHAT_ID
+               (  message.chat.id == CHAT_ID or message.chat.id == OC_CHAT_ID )
                 and (
                     message.message_thread_id is None
                     or message.message_thread_id == OF_TID
@@ -573,7 +573,7 @@ async def main_process(message):
             or message.chat.id == ADMIN_ID
         )
         and message.text is not None
-        and message.text == "/show ypt-lb"
+        and message.text == "/ypt"
     ):
         await bot.send_chat_action(
             chat_id=message.chat.id,
@@ -768,9 +768,10 @@ async def send_jee_reminder(cid, tid=None):
     message += "⏳" + str(jee_adv) + " days left for JEE Advanced\n\n"
     message += "_”" + quote.split("\n")[0] + "_”\n"
     message += "‎     ~ " + quote.split("\n")[1]
-    await bot.send_message(
+    m = await bot.send_message(
         text=message, chat_id=cid, message_thread_id=tid, parse_mode="markdown"
     )
+    await bot.pin_chat_message(cid, m.id)
 
 
 async def send_dpp():
