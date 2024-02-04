@@ -43,7 +43,7 @@ def resolve_topic(topic):
             result = topics[topic]
             return result
         except KeyError:
-            eprint("unknown topic", topic)
+            #eprint("unknown topic", topic)
             return "unknown topic"
     elif type(topic) == str:
         topics = {

@@ -779,7 +779,7 @@ async def send_dpp():
         action="upload_document", chat_id=CHAT_ID, message_thread_id=DPP_ID
     )
     await bot.send_chat_action(
-        action="upload_document", chat_id=OC_CHAT_ID, message_thread_id=DPP_ID
+        action="upload_document", chat_id=OC_CHAT_ID
     )
     dpp = await get_dpp()
     if dpp is not None:
@@ -818,11 +818,12 @@ async def send_dpp():
             message_thread_id=DPP_ID,
         )
         try:
-            await bot.send_document(
+            m = await bot.send_document(
                 OC_CHAT_ID,
                 InputFile(fname),
                 caption="Daily DPP - Today's Topic: " + topic_name + "\n" + message,
             )
+            await bot.pin_chat_message(OC_CHAT_ID, m.id)
         except:
             eprint("error sending dpp to organic chem group")
         eprint("sent dpp")
