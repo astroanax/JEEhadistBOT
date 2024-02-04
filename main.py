@@ -21,6 +21,7 @@ from getDpp import get_dpp
 TOKEN = os.environ["TG_BOT_TOKEN"]
 # chat ids
 CHAT_ID = -1001845692082
+OC_CHAT_ID = -1002096231908
 DT_TID = 8336
 OF_TID = 3471
 NTC_ID = 11695
@@ -33,7 +34,6 @@ NITCians = [
     1761484268,  # Vijay
     6652261291,  # Sandeep
     5642248491,  # Durijesh
-    1394643085,  # Nishant
     1170385621,  # Insaf
 ]
 
@@ -46,6 +46,7 @@ data["pl_data"] = {}
 data["sl_data"] = {}
 
 muted = []
+oc_muted = []
 ypt_cache = [None, None]
 remind_jee_users = [1744289341, 6165497652]  # Devansh @devansh1261  # $....
 
@@ -75,9 +76,11 @@ async def main_process(message):
         " to chat ",
         message.chat.id,
     )
-    if message.chat.id == CHAT_ID:
+    if message.chat.id == CHAT_ID or message.chat.id == OC_CHAT_ID:
         await stats.messageq.put(message)
     if message.chat.id == CHAT_ID and message.from_user.id in muted:
+        await bot.delete_message(chat_id=message.chat.id, message_id=message.id)
+    if message.chat.id == OC_CHAT_ID and message.from_user.id in oc_muted:
         await bot.delete_message(chat_id=message.chat.id, message_id=message.id)
     if (
         message.chat.id == CHAT_ID
@@ -95,6 +98,23 @@ async def main_process(message):
                     print(message.entities)
                     user_id = message.entities[1].user.id
                     muted.append(user_id)
+                    await bot.reply_to(message, text="muted")
+    if (
+        message.chat.id == OC_CHAT_ID
+        and message.text is not None
+        and message.text.startswith("/mute ")
+    ):
+        if len(message.text.strip().split()) > 1:
+            if len(message.entities) > 1:
+                if message.entities[1].type == "mention":
+                    username = message.text.strip().split()[1]
+                    user_id = await resolve_username(username[1:])
+                    oc_muted.append(user_id)
+                    await bot.reply_to(message, text="muted")
+                elif message.entities[1].type == "text_mention":
+                    print(message.entities)
+                    user_id = message.entities[1].user.id
+                    oc_muted.append(user_id)
                     await bot.reply_to(message, text="muted")
     if message.chat.id == NITC_TID:
         if message.from_user.id != ADMIN_ID and not message.from_user.id in NITCians:
@@ -134,6 +154,28 @@ async def main_process(message):
                     user_id = message.entities[1].user.id
                     try:
                         muted.remove(user_id)
+                        await bot.reply_to(message, text="unmuted")
+                    except:
+                        pass
+    if (
+        message.chat.id == OC_CHAT_ID
+        and message.text is not None
+        and message.text.startswith("/unmute ")
+    ):
+        if len(message.text.strip().split()) > 1:
+            if len(message.entities) > 1:
+                if message.entities[1].type == "mention":
+                    username = message.text.strip().split()[1]
+                    user_id = await resolve_username(username[1:])
+                    try:
+                        oc_muted.remove(user_id)
+                        await bot.reply_to(message, text="unmuted")
+                    except:
+                        pass
+                elif message.entities[1].type == "text_mention":
+                    user_id = message.entities[1].user.id
+                    try:
+                        oc_muted.remove(user_id)
                         await bot.reply_to(message, text="unmuted")
                     except:
                         pass
@@ -304,7 +346,7 @@ async def main_process(message):
     if (
         (
             (
-                message.chat.id == CHAT_ID
+                ( message.chat.id == CHAT_ID or message.chat.id == OC_CHAT_ID )
                 and (
                     message.message_thread_id is None
                     or message.message_thread_id == OF_TID
@@ -331,7 +373,7 @@ async def main_process(message):
                             await bot.reply_to(message, "no such user found")
                         else:
                             total_messages, top_topics = await stats.get_user_stats(
-                                user_id
+                                user_id, message.chat.id
                             )
                             text = "📊Statistics for user " + username + "\n"
                             text += (
@@ -365,7 +407,7 @@ async def main_process(message):
                         action="typing",
                     )
                     user_id = message.entities[0].user.id
-                    total_messages, top_topics = await stats.get_user_stats(user_id)
+                    total_messages, top_topics = await stats.get_user_stats(user_id, message.chat.id)
                     text = (
                         "📊Statistics for user "
                         + user_link(user=message.entities[0].user)
@@ -496,8 +538,11 @@ async def main_process(message):
                 message_thread_id=message.message_thread_id,
                 action="typing",
             )
-            users, topics = await stats.get_overall_stats()
-            text = "--📋STATISTICS FOR 95%ilers Droppers--\n\n"
+            users, topics = await stats.get_overall_stats(message.chat.id)
+            if message.chat.id == OC_CHAT_ID:
+                text = "--📋STATISTICS FOR Organic Chemistry Discussion--\n\n"
+            else:
+                text = "--📋STATISTICS FOR 95%ilers Droppers--\n\n"
             text += "Top users:👄\n"
             for i, [user, count] in enumerate(users):
                 try:
@@ -719,7 +764,7 @@ async def send_jee_reminder(cid, tid=None):
     await bot.send_chat_action(action="typing", message_thread_id=tid, chat_id=cid)
     jee_main, jee_adv, quote = jee_reminder()
     message = "*⏰ DAILY REMINDER*\n\n"
-    message += "⏳" + str(jee_main) + " days left for JEE Main\n"
+    #message += "⏳" + str(jee_main) + " days left for JEE Main\n"
     message += "⏳" + str(jee_adv) + " days left for JEE Advanced\n\n"
     message += "_”" + quote.split("\n")[0] + "_”\n"
     message += "‎     ~ " + quote.split("\n")[1]
@@ -731,6 +776,9 @@ async def send_jee_reminder(cid, tid=None):
 async def send_dpp():
     await bot.send_chat_action(
         action="upload_document", chat_id=CHAT_ID, message_thread_id=DPP_ID
+    )
+    await bot.send_chat_action(
+        action="upload_document", chat_id=OC_CHAT_ID, message_thread_id=DPP_ID
     )
     dpp = await get_dpp()
     if dpp is not None:
@@ -768,6 +816,14 @@ async def send_dpp():
             caption="Daily DPP - Today's Topic: " + topic_name + "\n" + message,
             message_thread_id=DPP_ID,
         )
+        try:
+            await bot.send_document(
+                OC_CHAT_ID,
+                InputFile(fname),
+                caption="Daily DPP - Today's Topic: " + topic_name + "\n" + message,
+            )
+        except:
+            eprint("error sending dpp to organic chem group")
         eprint("sent dpp")
         os.remove(fname)
         os.remove("downloaded.pdf")

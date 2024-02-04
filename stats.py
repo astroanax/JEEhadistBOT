@@ -14,16 +14,20 @@ async def processMessageQueue():
 
 
 async def handle_message(message):
+    chat_id = str(message.chat.id)
     user = str(message.from_user.id)
     topic = message.message_thread_id
     if topic is None:
         topic = -1
     topic = str(topic)
     try:
-        stats = json.loads(await db.r.get("stats"))
+        stats_all = json.load(open("stats.json", "r"))
+        stats = stats_all["stats-"+chat_id]
     except:
-        await db.r.set('stats', '{}')
-        stats = json.loads(await db.r.get("stats"))
+        with open("stats.json", "w+") as f:
+            f.write("{}")
+        stats_all = json.load(open("stats.json", "r"))
+        stats = stats_all["stats-"+chat_id]
     if user not in stats.keys():
         stats[user] = {}
         stats[user][topic] = 1
@@ -31,16 +35,18 @@ async def handle_message(message):
         stats[user][topic] = 1
     else:
         stats[user][topic] += 1
-    await db.r.set("stats", json.dumps(stats))
+    stats_all["stats-"+chat_id] = stats
+    json.dump(stats_all, open("stats.json", 'w'))
 
 
 async def get_topic_stats(topic):
     topic = str(topic)
     try:
-        stats = json.loads(await db.r.get("stats"))
+        stats = json.load(open("stats.json", "r"))["stats-"+chat_id]
     except:
-        await db.r.set('stats', '{}')
-        stats = json.loads(await db.r.get("stats"))
+        with open("stats.json", "w+") as f:
+            f.write("{}")
+        stats = json.load(open("stats.json", "r"))["stats-"+chat_id]
     top_users = []
     total_messages = 0
     for user in stats.keys():
@@ -53,14 +59,16 @@ async def get_topic_stats(topic):
     return total_messages, top_users
 
 
-async def get_user_stats(user):
+async def get_user_stats(user, chat_id):
+    chat_id = str(chat_id)
     try:
         user = str(user)
         try:
-            stats = json.loads(await db.r.get("stats"))
+            stats = json.load(open("stats.json", "r"))["stats-"+chat_id]
         except:
-            await db.r.set("stats", '{}')
-            stats = json.loads(await db.r.get("stats"))
+            with open("stats.json", "w+") as f:
+                f.write("{}")
+            stats = json.load(open("stats.json", "r"))["stats-"+chat_id]
         top_topics = []
         total_messages = 0
         if not user in stats.keys():
@@ -75,12 +83,14 @@ async def get_user_stats(user):
         eprint(e)
 
 
-async def get_overall_stats():
+async def get_overall_stats(chat_id):
+    chat_id = str(chat_id)
     try:
-        stats = json.loads(await db.r.get("stats"))
+        stats = json.load(open("stats.json", "r"))["stats-"+chat_id]
     except:
-        await db.r.set("stats", '{}')
-        stats = json.loads(await db.r.get("stats"))
+        with open("stats.json", "w+") as f:
+            f.write("{}")
+        stats = json.load(open("stats.json", "r"))["stats-"+chat_id]
     topics = {}
     users = []
     for user in stats.keys():

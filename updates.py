@@ -7,7 +7,7 @@ import datetime
 import pytz
 import db
 
-JEE_ADV = datetime.datetime(2024, 5, 28, tzinfo=pytz.timezone("Asia/Kolkata"))
+JEE_ADV = datetime.datetime(2024, 5, 26, tzinfo=pytz.timezone("Asia/Kolkata"))
 JEE_MAIN = datetime.datetime(2024, 1, 27, tzinfo=pytz.timezone("Asia/Kolkata"))
 
 

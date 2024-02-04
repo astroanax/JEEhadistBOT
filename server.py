@@ -81,6 +81,11 @@ async def handle_client(reader, writer):
                 text=message,
                 parse_mode="html",
             )
+            await main.bot.send_message(
+                chat_id=main.OC_CHAT_ID,
+                text=message,
+                parse_mode="html",
+            )
     writer.write(response.encode("utf8"))
     await writer.drain()
     writer.close()
